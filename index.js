@@ -257,7 +257,6 @@ exports.processMessage = function(data) {
  */
 exports.sendMessage = function(data) {
   var params = {
-    Destinations: data.recipients,
     Source: data.originalRecipient,
     RawMessage: {
       Data: data.emailData
@@ -267,16 +266,22 @@ exports.sendMessage = function(data) {
     "Original recipients: " + data.originalRecipients.join(", ") +
     ". Transformed recipients: " + data.recipients.join(", ") + "."});
   return new Promise(function(resolve, reject) {
-    data.ses.sendRawEmail(params, function(err, result) {
-      if (err) {
-        data.log({level: "error", message: "sendRawEmail() returned error.",
-          error: err, stack: err.stack});
-        return reject(new Error('Error: Email sending failed.'));
-      }
-      data.log({level: "info", message: "sendRawEmail() successful.",
-        result: result});
-      resolve(data);
+    data.recipients.forEach(function(recipient) {
+      data.log({level: "info", message: "sendMessage To: " + recipient});
+      params.Destinations = [recipient];
+      data.ses.sendRawEmail(params, function(err, result) {
+        if (err) {
+          data.log({level: "error",
+                    message: "sendRawEmail() returned error.",
+                    error: err, stack: err.stack});
+          return reject(new Error('Error: Email sending failed.'));
+        }
+        data.log({level: "info",
+                  message: "sendRawEmail() successful.",
+                  result: result});
+      });
     });
+    resolve(data);
   });
 };
 
