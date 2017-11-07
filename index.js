@@ -99,6 +99,10 @@ exports.transformRecipients = function(data) {
       } else {
         origEmailDomain = origEmailKey.slice(pos);
         origEmailUser = origEmailKey.slice(0, pos);
+        pos = origEmailUser.lastIndexOf("+");
+        if (pos !== -1) {
+          origEmailUser = origEmailUser.slice(0, pos);
+        }
       }
       if (origEmailDomain &&
           data.config.forwardMapping.hasOwnProperty(origEmailDomain)) {
